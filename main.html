@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Code Breaker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #codeContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .numberWheel {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 5px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .lamp {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 0 5px;
+            display: inline-block;
+        }
+
+        .green { background-color: green; }
+        .blue { background-color: blue; }
+        .red { background-color: red; }
+    </style>
+</head>
+<body>
+
+<div id="codeContainer"></div>
+<button onclick="checkCode()">Check Code</button>
+
+<script>
+    const secretCode = generateSecretCode();
+    const codeContainer = document.getElementById("codeContainer");
+
+    function generateSecretCode() {
+        return Array.from({ length: 4 }, () => Math.floor(Math.random() * 10));
+    }
+
+    function updateCodeDisplay() {
+        codeContainer.innerHTML = "";
+        secretCode.forEach(digit => {
+            const wheel = document.createElement("div");
+            wheel.classList.add("numberWheel");
+            wheel.textContent = digit;
+            wheel.addEventListener("click", () => rotateWheel(wheel, 1));
+            codeContainer.appendChild(wheel);
+        });
+    }
+
+    function rotateWheel(wheel, direction) {
+        const currentDigit = parseInt(wheel.textContent);
+        const newDigit = (currentDigit + direction + 10) % 10;
+        wheel.textContent = newDigit;
+    }
+
+    function checkCode() {
+        const userGuess = Array.from(codeContainer.children, wheel => parseInt(wheel.textContent));
+        const lampsContainer = document.getElementById("lampsContainer");
+
+        if (!lampsContainer) {
+            const lampsContainer = document.createElement("div");
+            lampsContainer.id = "lampsContainer";
+            document.body.appendChild(lampsContainer);
+        }
+
+        const lamps = document.getElementById("lampsContainer");
+        lamps.innerHTML = "";
+
+        for (let i = 0; i < userGuess.length; i++) {
+            const lamp = document.createElement("div");
+            lamp.classList.add("lamp");
+
+            if (userGuess[i] === secretCode[i]) {
+                lamp.classList.add("green");
+            } else if (secretCode.includes(userGuess[i])) {
+                lamp.classList.add("blue");
+            } else {
+                lamp.classList.add("red");
+            }
+
+            lamps.appendChild(lamp);
+        }
+
+        if (userGuess.every((digit, index) => digit === secretCode[index])) {
+            alert("Herzlichen Glückwunsch! Du hast den Code geknackt.");
+            resetGame();
+        }
+    }
+
+    function resetGame() {
+        secretCode = generateSecretCode();
+        updateCodeDisplay();
+        document.getElementById("lampsContainer").innerHTML = "";
+    }
+
+    updateCodeDisplay();
+</script>
+
+</body>
+</html>
